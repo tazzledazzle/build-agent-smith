@@ -67,6 +67,8 @@ Engineering leadership can trust a scheduled audit run to produce accurate, pers
 - **Performance**: Full audit target &lt;15 min for ~28 repos; FinOps-only &lt;3 min; incremental &lt;90s (from TDD)
 - **Compatibility**: Keep demo sources and in-memory path for tests/local demos alongside live mode
 - **Docs**: TDD.md remains design reference; README must describe what the binary actually does
+- **Task tracking**: Beads (`bd`) is the durable source of truth for progress, blockers, and handoffs — not markdown TODOs
+- **Quality bar**: golang-pro + test-master — gofmt/golangci-lint, context on blocking ops, table-driven tests with `-race`, ≥80% coverage on changed packages; code-documenter — GoDoc on all exported APIs
 
 ## Key Decisions
 
@@ -78,6 +80,9 @@ Engineering leadership can trust a scheduled audit run to produce accurate, pers
 | Auth via shared secret (+ webhook HMAC later) | Simple, portable; matches CronJob/API trigger model | — Pending |
 | LLM summarization only | Matches TDD trade-off (cost + determinism) | — Pending |
 | K8s CronJob + Docker deploy | Matches TDD operational considerations | — Pending |
+| Beads for project logistics | Survive session reset; track bugs/features/bottlenecks | — Pending |
+| Fine granularity + YOLO + parallel | User config for production-ready milestone | — Pending |
+| GoDoc + TDD/race quality bar | code-documenter + golang-pro + test-master | — Pending |
 
 ## Evolution
 
