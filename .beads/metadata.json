@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "build_agent_smith",
+  "project_id": "0abbe920-50bc-4b29-9123-eaaffbb27676"
+}
