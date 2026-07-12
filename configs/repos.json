@@ -1,0 +1,9 @@
+{
+  "repos": [
+    {"name": "payments-api", "owner": "acme", "provider": "github", "default_branch": "main"},
+    {"name": "identity-svc", "owner": "acme", "provider": "github", "default_branch": "main"},
+    {"name": "billing-worker", "owner": "acme", "provider": "gitlab", "default_branch": "main"},
+    {"name": "platform-infra", "owner": "acme", "provider": "github", "default_branch": "main"},
+    {"name": "data-pipeline", "owner": "acme", "provider": "github", "default_branch": "main"}
+  ]
+}
