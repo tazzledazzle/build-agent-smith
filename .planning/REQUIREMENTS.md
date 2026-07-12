@@ -96,13 +96,46 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| *(populated by roadmapper)* | | Pending |
+| AUTH-01 | Phase 3 | Pending |
+| AUTH-02 | Phase 3 | Pending |
+| AUTH-03 | Phase 3 | Pending |
+| JOBS-01 | Phase 4 | Pending |
+| JOBS-02 | Phase 4 | Pending |
+| JOBS-03 | Phase 4 | Pending |
+| PERS-01 | Phase 2 | Pending |
+| PERS-02 | Phase 1 | Pending |
+| PERS-03 | Phase 1 | Pending |
+| PERS-04 | Phase 2 | Pending |
+| OBS-01 | Phase 5 | Pending |
+| OBS-02 | Phase 5 | Pending |
+| CONC-01 | Phase 5 | Pending |
+| CONC-02 | Phase 7 | Pending |
+| CONC-03 | Phase 5 | Pending |
+| LIVE-01 | Phase 6 | Pending |
+| LIVE-02 | Phase 7 | Pending |
+| LIVE-03 | Phase 7 | Pending |
+| LIVE-04 | Phase 8 | Pending |
+| LIVE-05 | Phase 8 | Pending |
+| LIVE-06 | Phase 6 | Pending |
+| SLACK-01 | Phase 9 | Pending |
+| SLACK-02 | Phase 9 | Pending |
+| DORA-01 | Phase 10 | Pending |
+| RANK-01 | Phase 10 | Pending |
+| SCAN-01 | Phase 10 | Pending |
+| LLM-01 | Phase 11 | Pending |
+| LLM-02 | Phase 11 | Pending |
+| SCALE-01 | Phase 12 | Pending |
+| DEPL-01 | Phase 12 | Pending |
+| DOCS-01 | Phase 12 | Pending |
+| QUAL-01 | Phase 1 | Pending |
+| QUAL-02 | Phase 12 | Pending |
+| QUAL-03 | Phase 1 | Pending |
 
 **Coverage:**
-- v1 requirements: 32 total
-- Mapped to phases: 0
-- Unmapped: 32 ⚠️
+- v1 requirements: 34 total
+- Mapped to phases: 34
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-07-12*  
-*Last updated: 2026-07-12 after research synthesis*
+*Last updated: 2026-07-12 after roadmap creation*
