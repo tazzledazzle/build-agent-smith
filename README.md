@@ -1,63 +1,67 @@
 # build-agent-smith
 
+A Go prototype of a **platform maturity audit agent**: it scans a manifest of repositories, scores CI/CD maturity, test coverage and cloud-waste signals, and ranks findings by cost × severity ÷ effort.
+
+> **Status: working demo on fixture data.** Every data source is a deterministic in-process stub (`internal/demo`), and results are held in memory. Nothing here talks to GitHub, AWS, Codecov, Postgres or Slack yet. The numbers it prints come from fixtures, not from a real organization.
+
+## What works today
+
+- **Supervisor + worker pipeline** (Go, no framework): a supervisor plans scope and fans out to four workers, and an aggregator merges and ranks their findings.
+    - `reposcanner`: checks for standardization artifacts (CI config, Dockerfile, branch protection signals).
+    - `cicd`: parses pipeline YAML and scores it against a maturity rubric.
+    - `coverage`: parses Codecov-style JSON coverage reports.
+    - `finops`: flags underutilized or orphaned resources from an inventory.
+- **Three audit scopes:** `full`, `incremental` (one repo), `finops_only`.
+- **HTTP trigger:** `POST /audit/trigger` with `{"scope": "...", "repo": "..."}`.
+- **Digest output:** a text summary is built and logged (stand-in for a Slack post).
+- **Tests:** unit tests per package plus an end-to-end test; `make test` runs them with `-race`.
+
 ```mermaid
-flowchart TD
-    TRIGGER([Scheduler / Webhook\nCron weekly + PR merge + Slack]) --> SUPERVISOR
-
-    subgraph AGENT ["LangGraph Platform Audit Agent"]
-        SUPERVISOR[Supervisor Node\nPlan scope · Route workers · Manage state]
-
-        SUPERVISOR --> REPO[Repo Scanner Node\nCI config presence\nDockerfile standards\nBranch protection\nTemplate drift score]
-
-        SUPERVISOR --> CICD[CI/CD Auditor Node\nPipeline YAML parser\n6-dimension maturity rubric\nSecret hygiene scan]
-
-        SUPERVISOR --> COV[Coverage Analyzer Node\nCodecov · JaCoCo fetch\nLine/branch pct\nChange risk correlation]
-
-        SUPERVISOR --> FINOPS[Cloud FinOps Node\nCost Explorer API\nEC2/RDS utilization\nOrphaned resource detection\nUntagged resource flags]
-
-        REPO --> AGG
-        CICD --> AGG
-        COV --> AGG
-        FINOPS --> AGG
-
-        AGG[Findings Aggregator Node\nMerge · Deduplicate\nDORA scoring model\nRank by cost × severity ÷ effort]
-    end
-
-    subgraph SOURCES ["External Data Sources"]
-        GH[GitHub / GitLab API]
-        AWS_CE[AWS Cost Explorer]
-        CW[CloudWatch Metrics]
-        CC[Codecov API]
-    end
-
-    REPO -.->|read-only token| GH
-    CICD -.->|YAML fetch| GH
-    COV -.->|coverage reports| CC
-    FINOPS -.->|GetCostAndUsage| AWS_CE
-    FINOPS -.->|CPU/Memory metrics| CW
-
-    subgraph OUTPUT ["Output Layer"]
-        PG[(PostgreSQL\nfindings · repo_scores\naudit_runs)]
-        MV[Materialized View\nplatform_health_current]
-        SLACK[Slack Digest\nWeekly summary\nCritical alerts]
-        DASH[Grafana Dashboard\nDORA scores · Cost waste\nCI maturity trends]
-    end
-
-    AGG --> OUT[Output Writer Node]
-    OUT --> PG
-    PG --> MV
-    OUT --> SLACK
-    MV --> DASH
-
-    classDef node fill:#2d3748,stroke:#4a5568,color:#e2e8f0
-    classDef source fill:#1a365d,stroke:#2b6cb0,color:#bee3f8
-    classDef output fill:#1c4532,stroke:#276749,color:#c6f6d5
-    classDef trigger fill:#44337a,stroke:#6b46c1,color:#e9d8fd
-
-    class SUPERVISOR,REPO,CICD,COV,FINOPS,AGG,OUT node
-    class GH,AWS_CE,CW,CC source
-    class PG,MV,SLACK,DASH output
-    class TRIGGER trigger
+flowchart LR
+    API[POST /audit/trigger] --> SUP[Supervisor]
+    SUP --> REPO[Repo scanner]
+    SUP --> CICD[CI/CD auditor]
+    SUP --> COV[Coverage analyzer]
+    SUP --> FIN[FinOps analyzer]
+    REPO --> AGG[Aggregator<br/>dedupe + rank]
+    CICD --> AGG
+    COV --> AGG
+    FIN --> AGG
+    AGG --> OUT[Output writer]
+    OUT --> MEM[(In-memory store)]
+    OUT --> LOG[Digest to log]
+    DEMO[[Fixture sources<br/>internal/demo]] -.-> REPO
+    DEMO -.-> CICD
+    DEMO -.-> COV
+    DEMO -.-> FIN
 ```
 
-Built LangGraph-based platform audit agent that automatically measured infrastructure standardization, CI/CD maturity, and test coverage across all 28 repositories — gave engineering leadership and FinOps a continuous view into cloud resource utilization patterns and surfaced $120K+ in underutilized compute that was subsequently right-sized.
+## Run it
+
+```bash
+make test          # unit + e2e tests with the race detector
+make run           # builds bin/agent and serves on :8080
+make smoke         # boots the server and exercises each scope with curl
+
+# or by hand
+curl -s -X POST localhost:8080/audit/trigger \
+  -H 'Content-Type: application/json' \
+  -d '{"scope":"full"}'
+```
+
+The repo list comes from `configs/repos.json` (a sample manifest of five fictional repos).
+
+## Not built yet
+
+- Real adapters for GitHub/GitLab, AWS Cost Explorer and CloudWatch, and Codecov. The worker interfaces are in place, so this means implementing `agent.Dependencies`.
+- A PostgreSQL store. `migrations/001_schema.sql` holds the intended schema, but the running code uses `store.Memory`.
+- A real Slack notifier, and Grafana dashboards over the stored results.
+- An LLM planning step. Routing is deterministic today.
+
+## Design notes
+
+`TDD.md` is the original design document. It describes the target architecture, which is broader than what is implemented here.
+
+## Background
+
+The design comes from a platform-maturity audit I built for a real 28-repository organization. This repository is a clean-room rebuild on fixture data, and it carries no data or code from that environment.
